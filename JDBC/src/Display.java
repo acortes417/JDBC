@@ -14,7 +14,7 @@ public class Display {
     Scanner scan = new Scanner(System.in);
     Statement stmt = null;
     Connection conn = null;
-    static final String displayFormat="%-15s%-15s%-15s%-15s\n";
+    String displayFormat = "%-15s%-15s%-15s\n";
     
     Display(Statement state, Connection con)
     {
@@ -24,51 +24,54 @@ public class Display {
     }
     void mainDis()
     {
-        System.out.println("*******JDBC Project*******");
-        System.out.println("1. Print All Writing Groups");
-        System.out.println("2. Choose Writing Group data");
-        System.out.println("3. Print All Publishers");
-        System.out.println("4. Choose Publisher data");
-        System.out.println("5. Print All Books");
-        System.out.println("6. Choose Book data");
-        System.out.println("7. Insert new Book");
-        System.out.println("8. Insert new Publisher");
-        System.out.println("9. Remove Book");
-        System.out.println("10. end");
-        
-        int choice = getIntRange(1,10);
-        switch (choice) {
-            case 1:
-                printWritingsGroups();
-                break;
-            case 2:
-                chooseWritingGroups();
-                break;
-            case 3:
-                printPublishers();
-                break;
-            case 4:
-                choosePublisher();
-                break;
-            case 5:
-                printBooks();
-                break;
-            case 6:
-                chooseBooks();
-                break;
-            case 7:
-                insertBook();
-                break;
-            case 8:
-                insertPublisher();
-                break;
-            case 9:
-                removeBook();
-                break;
-            default:
-                break;
-        }        
-        System.out.println("\n");
+        int choice = 0;
+        while (choice != 10){
+            System.out.println("*******JDBC Project*******");
+            System.out.println("1. Print All Writing Groups");
+            System.out.println("2. Choose Writing Group data");
+            System.out.println("3. Print All Publishers");
+            System.out.println("4. Choose Publisher data");
+            System.out.println("5. Print All Books");
+            System.out.println("6. Choose Book data");
+            System.out.println("7. Insert new Book");
+            System.out.println("8. Insert new Publisher");
+            System.out.println("9. Remove Book");
+            System.out.println("10. end");
+
+            choice = getIntRange(1,10);
+            switch (choice) {
+                case 1:
+                    printWritingsGroups();
+                    break;
+                case 2:
+                    choice = chooseWritingGroups();
+                    break;
+                case 3:
+                    printPublishers();
+                    break;
+                case 4:
+                    choice = choosePublisher();
+                    break;
+                case 5:
+                    printBooks();
+                    break;
+                case 6:
+                    choice = chooseBooks();
+                    break;
+                case 7:
+                    insertBook();
+                    break;
+                case 8:
+                    insertPublisher();
+                    break;
+                case 9:
+                    removeBook();
+                    break;
+                default:
+                    break;
+            }        
+            System.out.println("\n");
+        }
     }
     void printWritingsGroups()
     {
@@ -90,16 +93,16 @@ public class Display {
             System.out.println(err.getMessage());
         }
         System.out.println("\n");
-        mainDis();
+        
     }
-    void chooseWritingGroups()
+    int chooseWritingGroups()
     {
-       System.out.println("Enter the Writing Group Name you wish to find");
+       System.out.print("Enter the Writing Group Name you wish to find: ");
        String name = "";
        scan = scan.useDelimiter("\n");
        name = scan.next();
      
-       String sql = "SELECT * FROM WritingGroups WHERE GroupName = '" + name + "'";
+       String sql = "SELECT * FROM WritingGroups WHERE LOWER(GroupName) LIKE LOWER('" + name + "')";
         try{
             ResultSet rs = stmt.executeQuery(sql);
             
@@ -118,7 +121,7 @@ public class Display {
                 }while(rs.next());
             }
             else
-                System.out.println("Sorry, there are no Writing Groups in your database");
+                System.out.println("Sorry, there are no Writing Groups in your database with the name: " + name);
         }
         catch(SQLException err){
             System.out.println(err.getMessage());
@@ -130,10 +133,12 @@ public class Display {
         int choice = getIntRange(1,3);
         
         System.out.println("\n");
-        if(choice == 1)
-            mainDis();
-        else if(choice == 2)
+        
+        if(choice == 2)
             chooseWritingGroups();
+        else if(choice == 3)
+            return 10;
+        return 0;
    
     }
     String dispNull (String input) 
@@ -184,15 +189,14 @@ public class Display {
             System.out.println(err.getMessage());
         }
         System.out.println("\n");
-        mainDis();
     }
-    void choosePublisher()
+    int choosePublisher()
     {
-       System.out.println("Enter the Publisher Name you wish to find");
+       System.out.print("Enter the Publisher Name you wish to find: ");
        String name = "";
        scan = scan.useDelimiter("\n");
        name = scan.next();
-       String sql = "SELECT  * FROM Publishers WHERE PublisherName = '" + name +"'";
+       String sql = "SELECT  * FROM Publishers WHERE LOWER(PublisherName) LIKE LOWER('" + name +"')";
         try{
             ResultSet rs = stmt.executeQuery(sql);
             if(rs.next()){
@@ -210,7 +214,7 @@ public class Display {
                 }while(rs.next());
             }
             else
-                System.out.println("Sorry, there are no Writing Groups in your database");
+                System.out.println("Sorry, there are no Publishers with the name: " + name);
         }
         catch(SQLException err){
             System.out.println(err.getMessage());
@@ -222,10 +226,11 @@ public class Display {
         int choice = getIntRange(1,3);
         
         System.out.println("\n");
-        if(choice == 1)
-            mainDis();
+        if(choice == 3)
+            return 10;
         else if(choice == 2)
             chooseWritingGroups();
+        return 0;
     }
     void printBooks()
     {
@@ -248,11 +253,50 @@ public class Display {
             System.out.println(err.getMessage());
         }
         System.out.println("\n");
-        mainDis();
     }
-    void chooseBooks()
+    int chooseBooks()
     {
+         System.out.print("Enter the Book Title: ");
+         scan = scan.useDelimiter("\n");
+         String bookName = scan.nextLine();
+
+       
+       displayFormat = "%-20s%-20s%-20s%-20s\n";
+       String sql = "SELECT BookTitle,PublisherName, GroupName, YearPublished,NumberPages FROM Books Where LOWER(booktitle) LIKE LOWER('"+bookName+"')";
+        try{
+            ResultSet rs = stmt.executeQuery(sql);
+            if(rs.next()){
+                System.out.printf(displayFormat, "Book Title", "Publisher Name","Writin Group","Number Of Pages");
+                
+                do{
+                    String gName = rs.getString("PublisherName");
+                    String writer = rs.getString("BookTitle");
+                    String year = rs.getString("GroupName");
+                    String pages = rs.getString("NumberPages");
+                    //Display values
+                    System.out.printf(displayFormat, 
+                            dispNull(gName), dispNull(writer), dispNull(year),dispNull(pages));
+                }while(rs.next());
+            }
+            else
+                System.out.println("Sorry, there are no Books with the name: " + bookName);
+        }
+        catch(SQLException err){
+            System.out.println(err.getMessage());
+        }
+        System.out.println("\n\n1. Back to main menu");
+        System.out.println("2. Try again");
+        System.out.println("3. Exit");
         
+        int choice = getIntRange(1,3);
+        
+        System.out.println("\n");
+        if(choice == 3)
+            return 10;
+        else if(choice == 2)
+            chooseBooks();
+        
+        return 0;
     }
     void insertBook()
     {
