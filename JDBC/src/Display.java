@@ -101,11 +101,13 @@ public class Display {
        String name = "";
        scan = scan.useDelimiter("\n");
        name = scan.next();
-     
-       String sql = "SELECT * FROM WritingGroups WHERE LOWER(GroupName) LIKE LOWER('" + name + "')";
+       
+       PreparedStatement getGroup = null;
+       String sql = "SELECT * FROM WritingGroups WHERE LOWER(GroupName) LIKE LOWER(?)";
         try{
-            ResultSet rs = stmt.executeQuery(sql);
-            
+            getGroup = conn.prepareStatement(sql);
+            getGroup.setString(1, name);
+            ResultSet rs = getGroup.executeQuery();
             if(rs.next()){
                 System.out.printf(displayFormat, "Group Name", "Head Writer", "Year Formed", "Subject");
                 
@@ -138,7 +140,9 @@ public class Display {
             chooseWritingGroups();
         else if(choice == 3)
             return 10;
-        return 0;
+        else if(choice == 1)
+            return 0;
+        return 10;
    
     }
     String dispNull (String input) 
@@ -193,12 +197,16 @@ public class Display {
     int choosePublisher()
     {
        System.out.print("Enter the Publisher Name you wish to find: ");
-       String name = "";
+       
        scan = scan.useDelimiter("\n");
-       name = scan.next();
-       String sql = "SELECT  * FROM Publishers WHERE LOWER(PublisherName) LIKE LOWER('" + name +"')";
+       String name = scan.next();
+       
+       PreparedStatement getPub = null;
+       String sql = "SELECT  * FROM Publishers WHERE LOWER(PublisherName) LIKE LOWER(?)";
         try{
-            ResultSet rs = stmt.executeQuery(sql);
+            getPub = conn.prepareStatement(sql);
+            getPub.setString(1, name);
+            ResultSet rs = getPub.executeQuery();
             if(rs.next()){
                 System.out.printf(displayFormat, "Publisher Name", "Publisher Address", "Publisher Phone", "Publisher Email");
                 
@@ -229,8 +237,10 @@ public class Display {
         if(choice == 3)
             return 10;
         else if(choice == 2)
-            chooseWritingGroups();
-        return 0;
+            choosePublisher();
+        else if(choice == 1)
+            return 0;
+        return 10;
     }
     void printBooks()
     {
@@ -256,15 +266,17 @@ public class Display {
     }
     int chooseBooks()
     {
-         System.out.print("Enter the Book Title: ");
-         scan = scan.useDelimiter("\n");
-         String bookName = scan.nextLine();
+        System.out.print("Enter the Book Title: ");
+        scan = scan.useDelimiter("\n");
+        String bookName = scan.nextLine();
 
-       
+       PreparedStatement getBook = null;
        displayFormat = "%-20s%-20s%-20s%-20s\n";
-       String sql = "SELECT BookTitle,PublisherName, GroupName, YearPublished,NumberPages FROM Books Where LOWER(booktitle) LIKE LOWER('"+bookName+"')";
+       String sql = "SELECT BookTitle,PublisherName, GroupName, YearPublished,NumberPages FROM Books Where LOWER(booktitle) LIKE LOWER(?)";
         try{
-            ResultSet rs = stmt.executeQuery(sql);
+            getBook = conn.prepareStatement(sql);
+            getBook.setString(1, bookName);
+            ResultSet rs = getBook.executeQuery();
             if(rs.next()){
                 System.out.printf(displayFormat, "Book Title", "Publisher Name","Writin Group","Number Of Pages");
                 
@@ -295,8 +307,10 @@ public class Display {
             return 10;
         else if(choice == 2)
             chooseBooks();
+        else if(choice == 1)
+            return 0;
         
-        return 0;
+        return 10;
     }
     void insertBook()
     {
