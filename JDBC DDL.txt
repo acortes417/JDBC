@@ -20,7 +20,7 @@ GroupName varchar(30) not null,
 BookTitle varchar(30) not null,
 PublisherName varchar(30) not null,
 YearPublished date not null,
-NumberPages int not null,
+NumberPages varChar(20) not null,
 constraint Books_ibfk_1 foreign key(GroupName)references WritingGroups(GroupName),
 constraint Publisher_ibfk_2 foreign key(PublisherName) references Publishers(PublisherName),
 constraint Books_idx_1 unique (BookTitle, PublisherName),
@@ -41,6 +41,6 @@ publishers(PublisherName,PublisherAddress,PublisherPhone,PublisherEmail) values
 
 insert into 
 books(GroupName,BookTitle,PublisherName,YearPublished,NumberPages)values
-('Book Bois','Harry Potter','Macmillian','3/1/2019',634),
-('Learn Math','Calculus 2', 'Crown Publishing','1/1/2018',1000),
-('Creative Writers', 'Making it up', 'Random Publishing', '4/2/2018',150);
+('Book Bois','Harry Potter','Macmillian','3/1/2019','634'),
+('Learn Math','Calculus 2', 'Crown Publishing','1/1/2018','1000'),
+('Creative Writers', 'Making it up', 'Random Publishing', '4/2/2018','150');
