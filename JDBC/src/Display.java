@@ -45,28 +45,28 @@ public class Display {
                     printWritingsGroups();
                     break;
                 case 2:
-                    choice = chooseWritingGroups();
+                    chooseWritingGroups();
                     break;
                 case 3:
                     printPublishers();
                     break;
                 case 4:
-                    choice = choosePublisher();
+                    choosePublisher();
                     break;
                 case 5:
                     printBooks();
                     break;
                 case 6:
-                    choice = chooseBooks();
+                    chooseBooks();
                     break;
                 case 7:
-                    choice = insertBook();
+                    insertBook();
                     break;
                 case 8:
-                    choice = insertPublisher();
+                    insertPublisher();
                     break;
                 case 9:
-                    choice = removeBook();
+                    removeBook();
                     break;
                 default:
                     break;
@@ -96,8 +96,9 @@ public class Display {
         System.out.println("\n");
         
     }
-    int chooseWritingGroups()
+    void chooseWritingGroups()
     {
+        displayFormat = "%-20s%-20s%-20s\n";
        System.out.print("Enter the Writing Group Name you wish to find: ");
        String name = scan.nextLine();
        
@@ -126,20 +127,7 @@ public class Display {
         }
         catch(SQLException err){
             System.out.println(err.getMessage());
-        }
-        System.out.println("\n\n1. Back to main menu");
-        System.out.println("2. Try again");
-        
-        int choice = getIntRange(1,2);
-        
-        System.out.println("\n");
-        
-        if(choice == 2)
-            chooseWritingGroups();
-        else
-            return 0;
-        return 0;
-   
+        }   
     }
     String dispNull (String input) 
     {
@@ -190,7 +178,7 @@ public class Display {
         }
         System.out.println("\n");
     }
-    int choosePublisher()
+    void choosePublisher()
     {
        System.out.print("Enter the Publisher Name you wish to find: ");
        displayFormat = "%-20s%-45s%-20s%-15s\n";
@@ -222,17 +210,6 @@ public class Display {
         catch(SQLException err){
             System.out.println(err.getMessage());
         }
-        System.out.println("\n\n1. Back to main menu");
-        System.out.println("2. Try again");
-        
-        int choice = getIntRange(1,2);
-        
-        System.out.println("\n");
-        if(choice == 2)
-            choosePublisher();
-        else if(choice == 1)
-            return 0;
-        return 0;
     }
     void printBooks()
     {
@@ -256,7 +233,7 @@ public class Display {
         }
         System.out.println("\n");
     }
-    int chooseBooks()
+    void chooseBooks()
     {
         System.out.print("Enter the Book Title: ");
         String bookName = scan.nextLine();
@@ -265,6 +242,7 @@ public class Display {
         displayFormat = "%-20s%-20s%-20s%-20s\n";
         String sql = "SELECT BookTitle,PublisherName, GroupName, YearPublished,NumberPages FROM Books Where LOWER(booktitle) LIKE LOWER(?)";
         try{
+            
             getBook = conn.prepareStatement(sql);
             getBook.setString(1, bookName);
             ResultSet rs = getBook.executeQuery();
@@ -278,7 +256,7 @@ public class Display {
                     String pages = rs.getString("NumberPages");
                     //Display values
                     System.out.printf(displayFormat, 
-                            dispNull(gName), dispNull(writer), dispNull(year),dispNull(pages));
+                             dispNull(writer), dispNull(gName),dispNull(year),dispNull(pages));
                 }while(rs.next());
             }
             else
@@ -287,20 +265,8 @@ public class Display {
         catch(SQLException err){
             System.out.println(err.getMessage());
         }
-        System.out.println("\n\n1. Back to main menu");
-        System.out.println("2. Try again");
-        
-        int choice = getIntRange(1,2);
-        
-        System.out.println("\n");
-        if(choice == 2)
-            chooseBooks();
-        else if(choice == 1)
-            return 0;
-        
-        return 0;
     }
-    int insertBook()
+    void insertBook()
     {        
         String stmt1 = "INSERT INTO Books(GroupName,BookTitle,PublisherName,YearPublished,NumberPages) VALUES(?, ?, ?, ?, ?)";
         String stmt3 = "SELECT PublisherName FROM Publishers";
@@ -350,7 +316,11 @@ public class Display {
                 pstmt.setString(3, list2.get(choice2));
                 pstmt.setString(4, yearPublished);
                 pstmt.setInt(5, numberPages);
-                pstmt.executeUpdate();
+                int change = pstmt.executeUpdate();
+                if(change > 0)
+                    System.out.println("New Book Added");
+                else
+                    System.out.println("Sorry, couldnt add the book " + bookTitle);
             }
             else
                 System.out.println("\nSorry, there are no Writing Groups in your database\n");
@@ -366,24 +336,14 @@ public class Display {
                 System.out.println("Sorry, We need an existing Publisher or insert a new one");
             }
             else if(e.getMessage().contains("date"))
-                System.out.println("please enter the date int the correct format (DD/MM/YYYY)");
+                System.out.println("Please enter the date int the correct format (DD/MM/YYYY)");
+            else if(e.getMessage().contains("duplicate"))
+                System.out.println("Sorry, that book already exists");
             else
                 System.out.println(e.getMessage());
         }
-        System.out.println("\n\n1. Back to main menu");
-        System.out.println("2. Try again");
-        
-        int choice = getIntRange(1,2);
-        
-        System.out.println("\n");
-        if(choice == 2)
-            insertBook();
-        else if(choice == 1)
-            return 0;
-        
-        return 0;
     }
-    int insertPublisher()
+    void insertPublisher()
     {
         System.out.println("Which publisher do you want to replace: ");
         
@@ -441,61 +401,80 @@ public class Display {
   	} 
         catch (SQLException e) 
         {
-            System.out.println(e.getMessage());
+            if(e.getMessage().contains("duplicate"))
+                System.out.println("Sorry, that book already exists");
   	}
-        System.out.println("\n\n1. Back to main menu");
-        System.out.println("2. Try again");
-        
-        int choice = getIntRange(1,2);
-        
-        System.out.println("\n");
-        if(choice == 2)
-            removeBook();
-        else if(choice == 1)
-            return 0;
-        
-        
-        return 0; 
     }
-    int removeBook()
-    {
-        System.out.println("Enter name of book and the name of its writing group or publisher to delete.");
-        System.out.print("Name of Book: ");
-        String bookName=scan.nextLine();
-        System.out.print("Writing Group: ");
-        String writingGroup = scan.nextLine();
-        System.out.print("Publisher Name: ");
-        String publisher = scan.nextLine();
-        
+    void removeBook()
+    {        
         String stmt1 = "DELETE FROM Books WHERE LOWER(BookTitle) LIKE LOWER(?) AND (LOWER(PublisherName) LIKE LOWER(?) OR LOWER(GroupName) LIKE LOWER(?))";
-  	try{
-            PreparedStatement pstmt = conn.prepareStatement(stmt1);
+        String stmt2 = "SELECT PublisherName FROM Publishers";
+        String stmt3 = "SELECT GroupName FROM WritingGroups";
+        String stmt4 = "SELECT BookTitle FROM Books";
+        
+        ArrayList<String> list1 = new ArrayList<String>();
+        ArrayList<String> list2 = new ArrayList<String>();
+        ArrayList<String> list3 = new ArrayList<String>();
+        try{
+            ResultSet rs = stmt.executeQuery(stmt4);
+            int count = 1;
+            if(rs.next()){
+                System.out.println("Choose the Book you want to delete:");
+                
+                do{
+                    String names = rs.getString("BookTitle");
+                    list1.add(names);
+                    System.out.println(count + ". " + names);
+                    count++;
+                }while(rs.next());
+                int choice = getIntRange(1,count) - 1;
+                
+                rs = stmt.executeQuery(stmt2);
+                count = 1;
+                System.out.println("Choose the Publisher of your book:");
+                if(rs.next()){
+                    do{
+                        String names = rs.getString("PublisherName");
+                        list2.add(names);
+                        System.out.println(count + ". " +names);
+                        count++;
+                    }while(rs.next());
+                }else 
+                    System.out.println("No poublishers in database");
+                int choice2 = getIntRange(1,count) - 1;
+                
+                rs = stmt.executeQuery(stmt3);
+                count = 1;
+                System.out.println("Choose the Writing Group:");
+                if(rs.next()){
+                    do{
+                        String names = rs.getString("GroupName");
+                        list3.add(names);
+                        System.out.println(count + ". " +names);
+                        count++;
+                    }while(rs.next());
+                }else 
+                    System.out.println("No Writing Group in database");
+                int choice3 = getIntRange(1,count) - 1;
+                PreparedStatement pstmt = conn.prepareStatement(stmt1);
             
             
-            pstmt.setString(1, bookName);
-            pstmt.setString(2, publisher);
-            pstmt.setString(3, writingGroup);
-            int count = pstmt.executeUpdate();
-            if(count > 0)
-                System.out.println("Successfully removed " + bookName);
+            pstmt.setString(1, list1.get(choice));
+            pstmt.setString(2, list2.get(choice2));
+            pstmt.setString(3, list3.get(choice3));
+            int num = pstmt.executeUpdate();
+            if(num > 0)
+                System.out.println("Successfully removed " + list1.get(choice));
             else
                 System.out.println("Sorry, we couldn't find a book matching those perameters");
+                
+            }else
+                System.out.println("Sorry, no Books in your datbase");
+            
   	} 
         catch (SQLException e) 
         {
             System.out.println(e.getMessage());
   	}
-        System.out.println("\n\n1. Back to main menu");
-        System.out.println("2. Try again");
-        
-        int choice = getIntRange(1,2);
-        
-        System.out.println("\n");
-        if(choice == 2)
-            removeBook();
-        else if(choice == 1)
-            return 0;
-        
-        return 0;
     }
 }
